@@ -1,0 +1,13 @@
+<div *ngIf="loading">Chargement...</div>
+
+<div *ngIf="error">{{ error }}</div>
+
+<ul *ngIf="!loading">
+  <li *ngFor="let job of jobs">
+    <h3>{{ job.name }}</h3>
+    <p>{{ job.company.name }}</p>
+    <p>{{ job.locations[0]?.name }}</p>
+    <p>{{ job }}</p>
+    <p> ======================================================== </p>
+  </li>
+</ul>

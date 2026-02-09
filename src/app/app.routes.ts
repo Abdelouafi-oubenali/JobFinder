@@ -6,4 +6,9 @@ export const routes: Routes = [
     path: 'users',
     loadChildren: () => import('./users/module/users.module').then(m => m.UsersModule)
   }
+  ,
+  {
+    path: 'offres',
+    loadComponent: () => import('./offres/offre/offres.component').then(m => m.OffresComponent)
+  }
 ];
