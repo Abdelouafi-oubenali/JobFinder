@@ -1,0 +1,25 @@
+<div class="profile-form">
+  <h2>Profile</h2>
+  <form (ngSubmit)="save()" [formGroup]="form">
+    <input formControlName="id" type="hidden" />
+    <div>
+      <label>First name</label>
+      <input formControlName="firstName" />
+    </div>
+    <div>
+      <label>Last name</label>
+      <input formControlName="lastName" />
+    </div>
+    <div>
+      <label>Email</label>
+      <input formControlName="email" type="email" />
+    </div>
+    <div>
+      <label>New password (leave blank to keep)</label>
+      <input formControlName="password" type="password" />
+    </div>
+    <button type="submit">Save</button>
+  </form>
+  <hr />
+  <button (click)="deleteAccount()">Delete account</button>
+</div>

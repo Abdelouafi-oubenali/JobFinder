@@ -1,0 +1,35 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "json-server",
+      "author": "typicode"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "some comment",
+      "postId": 1
+    }
+  ],
+  "users": [
+    {
+      "firstName": "Eos ab deleniti in ",
+      "lastName": "Aperiam exercitation",
+      "email": "puwyzyxem@mailinator.com",
+      "password": "Pa$$w0rd!",
+      "id": 1
+    },
+    {
+      "firstName": "Dolorum sit dolor f",
+      "lastName": "Eveniet quam veniam",
+      "email": "syqoxebir@mailinator.com",
+      "password": "1234567890",
+      "id": 2
+    }
+  ],
+  "profile": {
+    "name": "typicode"
+  }
+}
