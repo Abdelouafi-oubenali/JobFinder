@@ -6,8 +6,15 @@
 <header style="padding:1rem;border-bottom:1px solid #e6e6e6;">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
     <h1 style="margin:0;font-size:1.25rem;">JobFinder</h1>
-    <nav>
-      <a routerLink="/users/register" style="text-decoration:none;padding:0.5rem 0.75rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Create account</a>
+    <nav style="display:flex;gap:0.5rem;align-items:center;">
+      <ng-container *ngIf="currentUser as user; else loggedOut">
+        <a routerLink="/users/profile" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Profil</a>
+        <button (click)="logout()" style="padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;background:#fff;">Logout</button>
+      </ng-container>
+      <ng-template #loggedOut>
+        <a routerLink="/users/login" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Login</a>
+        <a routerLink="/users/register" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Register</a>
+      </ng-template>
     </nav>
   </div>
 </header>

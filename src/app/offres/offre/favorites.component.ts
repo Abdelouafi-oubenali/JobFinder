@@ -5,13 +5,12 @@ import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-offres',
+  selector: 'app-offres-favorites',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './offres.component.html'
+  templateUrl: './favorites.component.html'
 })
-export class OffresComponent implements OnInit {
-
+export class FavoritesComponent implements OnInit {
   jobs: any[] = [];
   loading = true;
   error = '';
@@ -24,18 +23,20 @@ export class OffresComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const saved: number[] = (typeof window !== 'undefined' && window.localStorage)
+      ? JSON.parse(window.localStorage.getItem('favoriteJobs') || '[]')
+      : [];
+    this.favorites = new Set(saved);
+
     this.offresService.getJobs().subscribe({
       next: (res) => {
-        this.jobs = res.results || [];
-        const saved: number[] = (typeof window !== 'undefined' && window.localStorage)
-          ? JSON.parse(window.localStorage.getItem('favoriteJobs') || '[]')
-          : [];
-        this.favorites = new Set(saved);
+        const all = res.results || [];
+        this.jobs = all.filter((j: any) => j && j.id != null && this.favorites.has(j.id));
         this.jobs.forEach((j: any) => (j._expanded = false));
         this.loading = false;
       },
       error: () => {
-        this.error = 'Erreur lors du chargement des offres';
+        this.error = 'Erreur lors du chargement des offres favorites';
         this.loading = false;
       }
     });
@@ -67,6 +68,8 @@ export class OffresComponent implements OnInit {
     if (!job || job.id == null) return;
     if (this.favorites.has(job.id)) {
       this.favorites.delete(job.id);
+      // remove from displayed jobs
+      this.jobs = this.jobs.filter(j => j.id !== job.id);
     } else {
       this.favorites.add(job.id);
     }

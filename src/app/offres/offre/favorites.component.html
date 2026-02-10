@@ -1,12 +1,15 @@
+<h2>Mes favoris</h2>
+
 <div *ngIf="loading">Chargement...</div>
 
 <div *ngIf="error">{{ error }}</div>
 
-<ul *ngIf="!loading">
+<ul *ngIf="!loading && jobs.length">
   <li *ngFor="let job of jobs">
     <h3>{{ job.name }}</h3>
-    <p>{{ job.company.name }}</p>
+    <p>{{ job.company?.name }}</p>
     <p>{{ job.locations[0]?.name }}</p>
+
     <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
       <button (click)="showDetails(job)" style="padding:0.35rem 0.6rem">{{ job._expanded ? 'Masquer' : 'Détails' }}</button>
       <button (click)="apply(job)" style="padding:0.35rem 0.6rem">Postuler</button>
@@ -21,3 +24,5 @@
     </div>
   </li>
 </ul>
+
+<div *ngIf="!loading && !jobs.length">Aucune offre favorite trouvée.</div>

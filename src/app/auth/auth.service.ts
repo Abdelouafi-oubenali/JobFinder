@@ -24,7 +24,9 @@ export class AuthService {
         if (user) {
           const safe = { ...user } as any;
           delete safe.password;
-          sessionStorage.setItem(this.storageKey, JSON.stringify(safe));
+          if (typeof window !== 'undefined' && window.sessionStorage) {
+            window.sessionStorage.setItem(this.storageKey, JSON.stringify(safe));
+          }
           return safe;
         }
         return null;
@@ -34,12 +36,16 @@ export class AuthService {
   
 
   logout() {
-    sessionStorage.removeItem(this.storageKey);
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(this.storageKey);
+    }
     this.router.navigate(['/users/login']);
   }
 
   currentUser(): AppUser | null {
-    const raw = sessionStorage.getItem(this.storageKey) || localStorage.getItem(this.storageKey);
+    if (typeof window === 'undefined') return null;
+    const raw = (window.sessionStorage && window.sessionStorage.getItem(this.storageKey)) ||
+      (window.localStorage && window.localStorage.getItem(this.storageKey));
     return raw ? (JSON.parse(raw) as AppUser) : null;
   }
 

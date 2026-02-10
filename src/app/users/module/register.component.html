@@ -4,20 +4,36 @@
     <div>
       <label>First name</label>
       <input formControlName="firstName" />
+      <div style="color:red;font-size:0.9rem" *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">
+        <div *ngIf="form.controls.firstName.errors?.['required']">Le prénom est requis.</div>
+        <div *ngIf="form.controls.firstName.errors?.['minlength']">Prénom trop court.</div>
+      </div>
     </div>
     <div>
       <label>Last name</label>
       <input formControlName="lastName" />
+      <div style="color:red;font-size:0.9rem" *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">
+        <div *ngIf="form.controls.lastName.errors?.['required']">Le nom est requis.</div>
+        <div *ngIf="form.controls.lastName.errors?.['minlength']">Nom trop court.</div>
+      </div>
     </div>
     <div>
       <label>Email</label>
       <input formControlName="email" type="email" />
+      <div style="color:red;font-size:0.9rem" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+        <div *ngIf="form.controls.email.errors?.['required']">Email requis.</div>
+        <div *ngIf="form.controls.email.errors?.['email']">Email invalide.</div>
+      </div>
     </div>
     <div>
       <label>Password</label>
       <input formControlName="password" type="password" />
+      <div style="color:red;font-size:0.9rem" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+        <div *ngIf="form.controls.password.errors?.['required']">Mot de passe requis.</div>
+        <div *ngIf="form.controls.password.errors?.['minlength']">Mot de passe trop court (min 6).</div>
+      </div>
     </div>
     <div style="color:red" *ngIf="error">{{ error }}</div>
-    <button type="submit">Create account</button>
+    <button type="submit" [disabled]="form.invalid">Create account</button>
   </form>
 </div>

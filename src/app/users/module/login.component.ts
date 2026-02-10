@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 
@@ -11,11 +11,16 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
+
   private fb = inject(FormBuilder);
-  form = this.fb.nonNullable.group({ email: '', password: '' });
-  
+
+  form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
   error = '';
-  returnUrl = '/';
+  returnUrl = '/offres';
 
   constructor(
     private auth: AuthService,
@@ -24,12 +29,17 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const q = this.route.snapshot.queryParams['returnUrl'];
-    if (q) this.returnUrl = q;
+    console.log('LoginComponent initialized');
   }
 
   submit() {
     this.error = '';
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const { email, password } = this.form.getRawValue();
     this.auth.login(email, password).subscribe(u => {
       if (u) {
@@ -38,5 +48,13 @@ export class LoginComponent implements OnInit {
         this.error = 'Invalid email or password';
       }
     });
+  }
+
+  get email() {
+    return this.form.controls.email;
+  }
+
+  get password() {
+    return this.form.controls.password;
   }
 }

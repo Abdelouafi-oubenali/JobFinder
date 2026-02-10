@@ -16,4 +16,4 @@ export class OffresService {
       `${this.apiUrl}?page=${page}&descending=true`
     );
   }
-}
+}   

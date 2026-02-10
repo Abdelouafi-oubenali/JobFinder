@@ -8,6 +8,10 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'offres/favorites',
+    loadComponent: () => import('./offres/offre/favorites.component').then(m => m.FavoritesComponent)
+  },
+  {
     path: 'offres',
     loadComponent: () => import('./offres/offre/offres.component').then(m => m.OffresComponent)
   }
