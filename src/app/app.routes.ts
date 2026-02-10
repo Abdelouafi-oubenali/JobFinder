@@ -12,6 +12,10 @@ export const routes: Routes = [
     loadComponent: () => import('./offres/offre/favorites.component').then(m => m.FavoritesComponent)
   },
   {
+    path: 'offres/:id',
+    loadComponent: () => import('./offres/offre/detail-job.component').then(m => m.DetailJobComponent)
+  },
+  {
     path: 'offres',
     loadComponent: () => import('./offres/offre/offres.component').then(m => m.OffresComponent)
   }

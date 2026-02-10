@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { OffresService } from '../service/offres.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
@@ -7,7 +8,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-offres-favorites',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './favorites.component.html'
 })
 export class FavoritesComponent implements OnInit {

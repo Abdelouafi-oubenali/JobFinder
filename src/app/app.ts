@@ -1,10 +1,11 @@
 import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule],
+  imports: [CommonModule, RouterOutlet, RouterModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

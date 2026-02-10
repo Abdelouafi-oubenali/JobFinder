@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { OffresService } from '../service/offres.service';
 import { AuthService } from '../../auth/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -7,7 +8,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-offres',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './offres.component.html'
 })
 export class OffresComponent implements OnInit {
@@ -27,12 +28,10 @@ export class OffresComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // check query param to auto-show followed list
     try {
       const followed = this.route.snapshot.queryParamMap.get('followed');
       if (followed === 'true') this.showFollowed = true;
     } catch (e) {
-      // ignore in SSR or if route not available
     }
     this.offresService.getJobs().subscribe({
       next: (res) => {
