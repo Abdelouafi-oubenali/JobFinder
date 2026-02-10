@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OffresService } from '../service/offres.service';
 import { AuthService } from '../../auth/auth.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-offres',
@@ -16,21 +16,35 @@ export class OffresComponent implements OnInit {
   loading = true;
   error = '';
   favorites = new Set<number>();
+  suived = new Set<number>();
+  showFollowed = false;
 
   constructor(
     private offresService: OffresService,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    // check query param to auto-show followed list
+    try {
+      const followed = this.route.snapshot.queryParamMap.get('followed');
+      if (followed === 'true') this.showFollowed = true;
+    } catch (e) {
+      // ignore in SSR or if route not available
+    }
     this.offresService.getJobs().subscribe({
       next: (res) => {
         this.jobs = res.results || [];
-        const saved: number[] = (typeof window !== 'undefined' && window.localStorage)
+        const favSaved: number[] = (typeof window !== 'undefined' && window.localStorage)
           ? JSON.parse(window.localStorage.getItem('favoriteJobs') || '[]')
           : [];
-        this.favorites = new Set(saved);
+        this.favorites = new Set(favSaved);
+        const suivSaved: number[] = (typeof window !== 'undefined' && window.localStorage)
+          ? JSON.parse(window.localStorage.getItem('suivedJobs') || '[]')
+          : [];
+        this.suived = new Set(suivSaved);
         this.jobs.forEach((j: any) => (j._expanded = false));
         this.loading = false;
       },
@@ -51,11 +65,41 @@ export class OffresComponent implements OnInit {
       return;
     }
     const url = job.refs?.landing_page || job.refs?.api || job.refs?.url || job.url;
+
     if (typeof window === 'undefined') return;
+
+    this.suived.add(job.id);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('suivedJobs', JSON.stringify(Array.from(this.suived)));
+    }
+
     if (url) {
       window.open(url, '_blank');
     } else {
       alert('Aucun lien de candidature disponible pour cette offre.');
+    }
+  }
+
+   deleteJob(job: any) {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/users/login']);
+      return;
+    }
+    if (!job || job.id == null) return;
+    this.suived.delete(job.id);
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (this.suived.size) {
+        window.localStorage.setItem('suivedJobs', JSON.stringify(Array.from(this.suived)));
+      } else {
+        window.localStorage.removeItem('suivedJobs');
+      }
+    }
+
+    this.suived = new Set(Array.from(this.suived));
+
+    if (this.showFollowed) {
+      this.jobs = this.jobs.filter(j => j.id !== job.id);
     }
   }
 
@@ -75,7 +119,17 @@ export class OffresComponent implements OnInit {
     }
   }
 
+ 
+
   isFavorite(job: any): boolean {
     return !!job && job.id != null && this.favorites.has(job.id);
+  }
+
+  get followedJobs(): any[] {
+    return this.jobs.filter(j => j && j.id != null && this.suived.has(j.id));
+  }
+
+  toggleShowFollowed() {
+    this.showFollowed = !this.showFollowed;
   }
 }

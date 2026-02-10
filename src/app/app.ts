@@ -1,5 +1,5 @@
 import { Component, signal, inject } from '@angular/core';
-import { RouterOutlet, RouterModule } from '@angular/router';
+import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { AuthService } from './auth/auth.service';
 
 @Component({
@@ -11,6 +11,7 @@ import { AuthService } from './auth/auth.service';
 export class App {
   protected readonly title = signal('JobFinder');
   protected readonly auth = inject(AuthService);
+  protected readonly router = inject(Router);
 
   get currentUser() {
     return this.auth.currentUser();
@@ -22,5 +23,17 @@ export class App {
 
   logout() {
     this.auth.logout();
+  }
+  authAction() {
+    if (this.isLoggedIn) {
+      this.logout();
+    } else {
+      // navigate to login
+      try {
+        this.router.navigate(['/users/login']);
+      } catch (e) {
+        try { (window as any).location.href = '/users/login'; } catch {}
+      }
+    }
   }
 }

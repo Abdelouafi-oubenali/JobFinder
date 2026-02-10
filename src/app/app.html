@@ -7,12 +7,19 @@
   <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
     <h1 style="margin:0;font-size:1.25rem;">JobFinder</h1>
     <nav style="display:flex;gap:0.5rem;align-items:center;">
+      <a routerLink="/offres" style="text-decoration:none;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;color:inherit;">All Offers</a>
+      <a [routerLink]="['/offres']" [queryParams]="{followed:true}" style="text-decoration:none;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Suivis</a>
+      <a routerLink="/offres/favorites" style="text-decoration:none;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Favorites</a>
+
+      <div style="width:1px;height:24px;background:#eee;margin:0 0.75rem"></div>
+
       <ng-container *ngIf="currentUser as user; else loggedOut">
         <a routerLink="/users/profile" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Profil</a>
-        <button (click)="logout()" style="padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;background:#fff;">Logout</button>
       </ng-container>
+      <button (click)="authAction()" style="padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;background:#fff;">
+        {{ isLoggedIn ? 'Logout' : 'Login' }}
+      </button>
       <ng-template #loggedOut>
-        <a routerLink="/users/login" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Login</a>
         <a routerLink="/users/register" style="text-decoration:none;padding:0.4rem 0.7rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Register</a>
       </ng-template>
     </nav>

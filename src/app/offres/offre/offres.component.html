@@ -2,7 +2,29 @@
 
 <div *ngIf="error">{{ error }}</div>
 
-<ul *ngIf="!loading">
+<div style="margin-bottom:1rem;display:flex;gap:0.5rem;align-items:center;">
+  <button (click)="toggleShowFollowed()" style="padding:0.4rem 0.6rem">{{ showFollowed ? 'Masquer mes suivis' : 'Afficher mes suivis (' + (suived.size || 0) + ')' }}</button>
+  <a routerLink="/offres/favorites" style="text-decoration:none;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;color:inherit;">Mes favoris ({{ favorites.size || 0 }})</a>
+</div>
+
+<div *ngIf="showFollowed">
+  <h3>Mes suivis</h3>
+  <ul>
+    <li *ngFor="let job of followedJobs">
+      <h4>{{ job.name }}</h4>
+      <p>{{ job.company?.name }}</p>
+      <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+        <button (click)="showDetails(job)">{{ job._expanded ? 'Masquer' : 'Détails' }}</button>
+        <button (click)="apply(job)">Postuler</button>
+        <button (click)="toggleFavorite(job)">{{ isFavorite(job) ? '★ Favori' : '☆ Favori' }}</button>
+        <button (click)="deleteJob(job)">Annuler suivi</button>
+      </div>
+      <div *ngIf="job._expanded" style="margin-top:0.25rem">{{ job.description || 'Pas de description.' }}</div>
+    </li>
+  </ul>
+</div>
+
+<ul *ngIf="!loading && !showFollowed">
   <li *ngFor="let job of jobs">
     <h3>{{ job.name }}</h3>
     <p>{{ job.company.name }}</p>
