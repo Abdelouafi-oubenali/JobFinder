@@ -124,3 +124,6 @@ Important methods:
 
 If you'd like, I can also create `docs/USERS.md` with extended examples and sample curl calls.
 
+
+
+npx json-server --watch db.json --port 3000
