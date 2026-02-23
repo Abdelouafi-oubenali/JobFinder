@@ -50,11 +50,10 @@
       "id": 4
     },
     {
-      "firstName": "Dolorem sit enim rec",
+      "id": 5,
+      "firstName": "Dolorem",
       "lastName": "Et ut eaque exercita",
-      "email": "test@gmail.com",
-      "password": "Pa$$w0rd!",
-      "id": 5
+      "email": "test@gmail.com"
     }
   ],
   "profile": {

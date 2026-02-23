@@ -57,73 +57,69 @@
         {{ followedJobs.length }} offre{{ followedJobs.length > 1 ? 's' : '' }}
       </span>
     </div>
-    
     <div class="grid gap-4 md:grid-cols-2">
       <div *ngFor="let job of followedJobs" class="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
         <div class="flex justify-between items-start mb-3">
-          <h4 class="text-lg font-semibold text-gray-800 leading-tight">{{ job.name }}</h4>
-          <button 
-            (click)="deleteJob(job)"
-            class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
-            title="Annuler le suivi"
-          >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-          </button>
+          <div>
+            <h4 class="text-lg font-semibold text-gray-800 leading-tight">{{ job.name }}</h4>
+            <div class="text-sm text-gray-500">{{ job.company?.name }}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="{
+              'bg-yellow-100 text-yellow-800': !(job._app?.status || job._status),
+              'bg-blue-100 text-blue-800': (job._app?.status || job._status) === 'suivi',
+              'bg-green-100 text-green-800': (job._app?.status || job._status) === 'accepté' || (job._app?.status || job._status) === 'accepted',
+              'bg-red-100 text-red-800': (job._app?.status || job._status) === 'refusé' || (job._app?.status || job._status) === 'rejected'
+            }">
+              {{ displayStatus(job._app?.status || job._status) }}
+            </span>
+            <button (click)="deleteJob(job)" class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200" title="Annuler le suivi">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        
+
         <div class="flex items-center gap-2 text-gray-600 mb-4">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
           </svg>
-          <span class="text-sm">{{ job.company?.name }}</span>
+          <span class="text-sm">{{ job.locations[0]?.name || 'Remote' }}</span>
         </div>
-        
+
         <div class="flex flex-wrap gap-2 mb-4">
-          <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-            {{ job.locations[0]?.name || 'Remote' }}
-          </span>
-          <span *ngIf="job.type" class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
-            {{ job.type }}
-          </span>
+          <span *ngIf="job.type" class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">{{ job.type }}</span>
         </div>
-        
+
         <div class="flex gap-2 mt-4 pt-4 border-t border-blue-100">
-          <button 
-            [routerLink]="['/offres', job.id]"
-            class="flex-1 px-3 py-2 text-sm bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 flex items-center justify-center gap-1"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Voir plus
-          </button>
-          <button 
-            (click)="apply(job)"
-            class="flex-1 px-3 py-2 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium"
-          >
-            Postuler
-          </button>
-          <button 
-            (click)="toggleFavorite(job)"
-            class="p-2 bg-amber-50 border border-amber-200 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors duration-200"
-            [title]="isFavorite(job) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-          >
+          <a [routerLink]="['/offres', job.id]" class="flex-1 px-3 py-2 text-sm bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200 flex items-center justify-center gap-1">Voir l'offre</a>
+          <button (click)="apply(job)" class="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium">Ouvrir le lien</button>
+          <button (click)="toggleFavorite(job)" class="p-2 bg-amber-50 border border-amber-200 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors duration-200" [title]="isFavorite(job) ? 'Retirer des favoris' : 'Ajouter aux favoris'">
             <svg class="w-5 h-5" [attr.fill]="isFavorite(job) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
             </svg>
           </button>
         </div>
-        
+
+        <div class="mt-3 flex items-center gap-2">
+          <button (click)="setStatus(job, 'en_attente')" [class.font-semibold]="(job._app?.status || job._status) === 'en_attente'" class="px-3 py-1 border rounded text-sm">En attente</button>
+          <button (click)="setStatus(job, 'accepté')" [class.font-semibold]="(job._app?.status || job._status) === 'accepté'" class="px-3 py-1 border rounded text-sm bg-green-50 text-green-700">Accepté</button>
+          <button (click)="setStatus(job, 'refusé')" [class.font-semibold]="(job._app?.status || job._status) === 'refusé'" class="px-3 py-1 border rounded text-sm bg-red-50 text-red-700">Refusé</button>
+        </div>
+
         <div *ngIf="job._expanded" class="mt-4 pt-4 border-t border-blue-100">
           <div class="prose prose-sm max-w-none">
             <p class="text-gray-600">{{ job.description || 'Pas de description disponible.' }}</p>
           </div>
         </div>
+
+        <!-- Notes removed per request; status buttons remain below -->
       </div>
     </div>
   </div>
+
+
 
   <!-- All Jobs List -->
   <div *ngIf="!loading && !showFollowed">

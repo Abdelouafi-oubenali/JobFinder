@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OffresService } from '../service/offres.service';
 import { AuthService } from '../../auth/auth.service';
+import { ApplicationsService } from '../service/applications.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
@@ -22,15 +23,18 @@ export class OffresComponent implements OnInit {
   favorites = new Set<number>();
   suived = new Set<number>();
   showFollowed = false;
+  applications: any[] = [];
+  appMap: Map<number, any> = new Map();
   // Pagination
   currentPage = 1;
   pageSize = 10; 
 
   constructor(
     private offresService: OffresService,
-    private auth: AuthService,
+    public auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private applicationsService: ApplicationsService
   ) {}
 
   ngOnInit() {
@@ -57,8 +61,10 @@ export class OffresComponent implements OnInit {
           ? JSON.parse(window.localStorage.getItem('suivedJobs') || '[]')
           : [];
         this.suived = new Set(suivSaved);
-          this.currentPage = 1;
-          this.jobs.forEach((j: any) => (j._expanded = false));
+            this.currentPage = 1;
+            this.jobs.forEach((j: any) => (j._expanded = false));
+            this.loadUserApplications();
+            
       },
       error: (err) => {
         console.error('Error loading jobs:', err);
@@ -81,6 +87,7 @@ export class OffresComponent implements OnInit {
         this.jobs = list;
           this.currentPage = 1;
         this.jobs.forEach((j: any) => (j._expanded = false));
+        this.loadUserApplications();
       },
       error: (err) => {
         console.error('Error searching jobs:', err);
@@ -172,6 +179,90 @@ export class OffresComponent implements OnInit {
     }
   }
 
+  // Save notes locally (and in ApplicationsService storage)
+  saveNotes(job: any) {
+    if (!job || job.id == null) return;
+    const app = this.appMap.get(job.id);
+    if (app && app.id) {
+      const updated = { ...app, notes: job._note || '' };
+      this.applicationsService.update(app.id, updated).subscribe(res => {
+        if (res) {
+          this.appMap.set(job.id, res);
+        }
+      });
+    } else {
+      // if not existing on storage, create an application record for notes
+      const user = this.auth.currentUser();
+      if (!user) return;
+      const newApp = {
+        userId: user.id,
+        offerId: job.id,
+        title: job.name || '',
+        company: job.company?.name || '',
+        location: job.locations?.[0]?.name || '',
+        url: job.refs?.landing_page || job.url || '',
+        status: 'suivi',
+        notes: job._note || '',
+        dateAdded: new Date().toISOString()
+      };
+      this.applicationsService.create(newApp).subscribe(created => {
+        this.applications.push(created);
+        this.appMap.set(job.id, created);
+      });
+    }
+  }
+
+  unfollowOffer(job: any) {
+    // remove follow locally and from storage
+    const app = this.appMap.get(job.id);
+    if (app && app.id) {
+      this.applicationsService.delete(app.id).subscribe(() => {
+        this.appMap.delete(job.id);
+        this.applications = this.applications.filter(a => a.id !== app.id);
+      });
+    }
+    this.suived.delete(job.id);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (this.suived.size) {
+        window.localStorage.setItem('suivedJobs', JSON.stringify(Array.from(this.suived)));
+      } else {
+        window.localStorage.removeItem('suivedJobs');
+      }
+    }
+    if (this.showFollowed) {
+      this.jobs = this.jobs.filter(j => j.id !== job.id);
+    }
+  }
+
+  followOffer(job: any) {
+    const user = this.auth.currentUser();
+    if (!user) {
+      this.router.navigate(['/users/login']);
+      return;
+    }
+    const existing = this.appMap.get(job.id);
+    if (existing) return;
+    const app = {
+      userId: user.id,
+      offerId: job.id,
+      title: job.name || '',
+      company: job.company?.name || '',
+      location: job.locations?.[0]?.name || '',
+      url: job.refs?.landing_page || job.url || '',
+      status: 'suivi',
+      notes: '',
+      dateAdded: new Date().toISOString()
+    };
+    this.applicationsService.create(app).subscribe(created => {
+      this.applications.push(created);
+      this.appMap.set(job.id, created);
+      this.suived.add(job.id);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem('suivedJobs', JSON.stringify(Array.from(this.suived)));
+      }
+    });
+  }
+
   toggleFavorite(job: any) {
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/users/login']);
@@ -200,5 +291,90 @@ export class OffresComponent implements OnInit {
 
   toggleShowFollowed() {
     this.showFollowed = !this.showFollowed;
+  }
+
+  // Persist or create status for a followed job
+  saveStatus(job: any) {
+    if (!job || job.id == null) return;
+    const app = this.appMap.get(job.id);
+    const newStatus = job._status || (job._app && job._app.status) || 'en_attente';
+    if (app && app.id) {
+      const updated = { ...app, status: newStatus };
+      this.applicationsService.update(app.id, updated).subscribe(res => {
+        if (res) {
+          this.appMap.set(job.id, res);
+          job._app = res;
+        }
+      });
+    } else {
+      const user = this.auth.currentUser();
+      if (!user) return;
+      const newApp = {
+        userId: user.id,
+        offerId: job.id,
+        title: job.name || '',
+        company: job.company?.name || '',
+        location: job.locations?.[0]?.name || '',
+        url: job.refs?.landing_page || job.url || '',
+        status: newStatus,
+        notes: job._note || '',
+        dateAdded: new Date().toISOString()
+      };
+      this.applicationsService.create(newApp).subscribe(created => {
+        this.applications.push(created);
+        this.appMap.set(job.id, created);
+        job._app = created;
+      });
+    }
+  }
+
+  setStatus(job: any, status: string) {
+    job._status = status;
+    this.saveStatus(job);
+  }
+
+  displayStatus(status?: string): string {
+    if (!status) return 'En attente';
+    switch (status) {
+      case 'en_attente':
+        return 'En attente';
+      case 'suivi':
+        return 'Suivi';
+      case 'accepté':
+      case 'accepted':
+        return 'Accepté';
+      case 'refusé':
+      case 'rejected':
+        return 'Refusé';
+      default:
+        return status;
+    }
+  }
+
+  loadUserApplications() {
+    const user = this.auth.currentUser();
+    if (!user || user.id == null) return;
+    this.applicationsService.getByUser(user.id).subscribe({
+      next: (apps) => {
+        this.applications = apps || [];
+        this.appMap.clear();
+        this.applications.forEach(a => {
+          if (a && a.offerId != null) {
+            this.appMap.set(a.offerId, a);
+            this.suived.add(a.offerId);
+            const job = this.jobs.find(j => j.id === a.offerId);
+            if (job) {
+              (job as any)._app = a;
+              (job as any)._note = a.notes || '';
+              (job as any)._status = a.status || 'en_attente';
+            }
+          }
+        });
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('suivedJobs', JSON.stringify(Array.from(this.suived)));
+        }
+      },
+      error: (e) => console.error('Failed to load user applications', e)
+    });
   }
 }

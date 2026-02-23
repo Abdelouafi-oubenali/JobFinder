@@ -13,7 +13,8 @@ export class AuthService {
   register(user: AppUser): Observable<AppUser> {
     return this.users.create(user).pipe(
       tap(u => {
-        // do
+        // do 
+        console.log("user create avec ... ")
       })
     );
   }
